@@ -24,6 +24,10 @@
     {
       "before": ["j", "k"],
       "after": ["<Esc>"]
+    },
+    {
+      "before": ["<C-y>"],
+      "commands": ["acceptSelectedSuggestion"]
     }
   ],
 
@@ -63,10 +67,49 @@
     {
       "before": ["<C-p>"],
       "commands": ["selectPrevSuggestion"]
+    }
+  ],
+  "workbench.editor.tabActionCloseVisibility": false,
+  "vim.normalModeKeyBindings": [
+    {
+      "before": ["-"],
+      "commands": [
+        {
+          "command": "oil-code.open"
+        }
+      ]
     },
     {
-      "before": ["<C-y>"],
-      "commands": ["acceptSelectedSuggestion"]
+      "before": ["<cr>"],
+      "commands": [
+        {
+          "command": "oil-code.select"
+        }
+      ]
+    },
+    {
+      "before": ["<c-l>"],
+      "commands": [
+        {
+          "command": "oil-code.refresh"
+        }
+      ]
+    },
+    {
+      "before": ["`"],
+      "commands": [
+        {
+          "command": "oil-code.cd"
+        }
+      ]
+    },
+    {
+      "before": ["g", "d"],
+      "commands": [
+        {
+          "command": "oil-code.toggleDetails"
+        }
+      ]
     }
   ]
 }

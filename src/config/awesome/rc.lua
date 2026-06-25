@@ -565,3 +565,4 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 -- spawn config
 awful.spawn.with_shell("xrandr -s 1366x768")
 awful.spawn.with_shell("xset r rate 200 35")
+awful.spawn.with_shell("pkill picom;picom &")
