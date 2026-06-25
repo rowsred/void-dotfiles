@@ -85,11 +85,11 @@ if [ "$1" == "reset" ]; then
         if [ -d "$dir" ]; then
             folder_name=$(basename "$dir")
             
-            # Pengecualian khusus untuk VS Code saat Reset
-            if [ "$folder_name" == "Code" ]; then
-                # Hanya hapus settings.json di dalam subfolder User
-                rm -f "$TARGET_DIR/Code/User/settings.json"
-                print_content_row ".config/Code/User/settings.json" "DELETED" "$R"
+            # Pengecualian khusus untuk VS Code & Code - OSS saat Reset
+            if [[ "$folder_name" == "Code" || "$folder_name" == "Code - OSS" ]]; then
+                # Hanya hapus settings.json di dalam subfolder User masing-masing aplikasi
+                rm -f "$TARGET_DIR/$folder_name/User/settings.json"
+                print_content_row ".config/$folder_name/User/settings.json" "DELETED" "$R"
             else
                 rm -rf "$TARGET_DIR/$folder_name"
                 print_content_row ".config/$folder_name" "DELETED" "$R"
@@ -127,22 +127,21 @@ else
             folder_name=$(basename "$dir")
             target_path="$TARGET_DIR/$folder_name"
             
-            # CEK APAKAH INI FOLDER VS CODE
-            if [ "$folder_name" == "Code" ]; then
-                # Pastikan direktori tujuan 'Code/User' ada tanpa menghapus isinya
+            # CEK APAKAH INI FOLDER VS CODE ATAU CODE - OSS
+            if [[ "$folder_name" == "Code" || "$folder_name" == "Code - OSS" ]]; then
+                # Pastikan direktori tujuan 'User' ada tanpa menghapus isi profil eksternal lainnya
                 mkdir -p "$target_path/User"
                 
-                # Hanya salin file settings.json jika ada di source dotfiles Anda
-                # Sesuaikan path di bawah jika struktur source Anda berbeda (misal langsung src/config/Code/settings.json)
+                # Cari file settings.json di source dengan beberapa alternatif struktur fallback
                 if [ -f "$dir/User/settings.json" ]; then
                     cp -f "$dir/User/settings.json" "$target_path/User/settings.json"
                 elif [ -f "$dir/settings.json" ]; then
                     cp -f "$dir/settings.json" "$target_path/User/settings.json"
                 fi
                 
-                print_content_row ".config/Code (Settings Only)" "UPDATED" "$G"
+                print_content_row ".config/$folder_name (Settings)" "UPDATED" "$G"
             else
-                # Wipe & Replace murni untuk folder selain VS Code [1]
+                # Wipe & Replace murni untuk folder selain rumpun VS Code
                 rm -rf "$target_path"
                 mkdir -p "$target_path"
                 cp -rf "$dir"/* "$target_path/"
