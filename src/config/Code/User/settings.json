@@ -1,0 +1,72 @@
+{
+  "vim.enableNeovim": true,
+  "vim.useSystemClipboard": true,
+  "vim.leader": "<space>",
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.wordWrap": "on",
+  "editor.wordWrapColumn": 80,
+  "editor.rulers": [80],
+  "editor.lineNumbers": "relative",
+  "workbench.sideBar.location": "right",
+  // =======================removetop===================
+  "window.titleBarStyle": "native",
+  "window.menuBarVisibility": "hidden",
+  "window.commandCenter": false,
+  "workbench.editor.showTabs": "multiple",
+  "workbench.editor.tabCloseButton": "off",
+  "workbench.editor.editorActionsLocation": "hidden",
+  "workbench.layoutControl.enabled": false,
+  "chat.disableAIFeatures": true,
+  "chat.commandCenter.enabled": false,
+  // ==========================================
+  "vim.insertModeKeyBindings": [
+    {
+      "before": ["j", "k"],
+      "after": ["<Esc>"]
+    }
+  ],
+
+  "vim.normalModeKeyBindingsNonRecursive": [
+    {
+      "before": ["<leader>", "w"],
+      "commands": ["workbench.action.files.save"]
+    },
+    {
+      "before": ["<leader>", "e"],
+      "commands": ["oil-code.open"]
+    },
+    {
+      "before": ["<leader>", "c"],
+      "commands": ["workbench.action.terminal.toggleTerminal"]
+    },
+    {
+      "before": ["<leader>", "x"],
+      "commands": ["workbench.action.closeActiveEditor"]
+    },
+    {
+      "before": ["<leader>", "n"],
+      "commands": ["workbench.action.nextEditor"]
+    },
+    {
+      "before": ["<leader>", "p"],
+      "commands": ["workbench.action.previousEditor"]
+    },
+    {
+      "before": ["<leader>", "f"],
+      "commands": ["workbench.action.quickOpen"]
+    },
+    {
+      "before": ["<C-n>"],
+      "commands": ["selectNextSuggestion"]
+    },
+    {
+      "before": ["<C-p>"],
+      "commands": ["selectPrevSuggestion"]
+    },
+    {
+      "before": ["<C-y>"],
+      "commands": ["acceptSelectedSuggestion"]
+    }
+  ]
+}

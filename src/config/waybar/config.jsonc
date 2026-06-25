@@ -1,0 +1,43 @@
+{
+  "layer": "top",
+  "position": "bottom",
+  "height": 24,
+  "modules-center": ["clock"],
+  "modules-right": ["custom/obs", "network", "tray"],
+  "modules-left": ["niri/workspaces"],
+
+  "niri/workspaces": {
+    "all-outputs": false, // False: show only workspaces on current monitor
+    "format": "", // Displays the icon instead of the raw workspace index
+  },
+  "hyprland/workspaces": {
+    "disable-scroll": true,
+    "all-outputs": true,
+    "active-only": false,
+    "on-click": "activate",
+    "format": "{name}",
+    "persistent-workspaces": {
+      "*": 9, // Menampilkan workspace 1-5 secara permanen di semua monitor
+    },
+  },
+  "clock": {
+    "format": "{:%Y-%m-%d %I:%M %p}",
+  },
+  "custom/nixos": {
+    "format": " ", // The font glyph for the NixOS icon
+    "tooltip": false,
+    "on-click": "fuzzel", // Optional: Opens your application menu on click
+  },
+  "custom/obs": {
+    "exec": "if pgrep obs > /dev/null; then echo '{\"text\": \"OBS ONLINE\", \"class\": \"online\"}'; else echo '{\"text\": \"OBS OFFLINE\", \"class\": \"offline\"}'; fi",
+    "return-type": "json",
+    "interval": 2,
+    "tooltip": false,
+  },
+  "network": {
+    "interval": 1,
+    "format-wifi": " {essid} ⇣{bandwidthDownBytes} ⇡{bandwidthUpBytes}",
+    "format-disconnected": "   Disconnected",
+    "tooltip": false,
+  },
+}

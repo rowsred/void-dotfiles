@@ -1,0 +1,191 @@
+#!/usr/bin/env bash
+
+# ==============================================================================
+# ⚔  DOTFILES MANAGER (BAT-STYLE BOX • CENTERED)  ⚔
+# ==============================================================================
+
+# Definisi Warna
+R='\033[1;31m'    # Red
+G='\033[1;32m'    # Green
+C='\033[1;36m'    # Cyan
+W='\033[1;37m'    # White Bold
+D='\033[0;90m'    # Dark Grey (Garis Kotak)
+NC='\033[0m'      # No Color
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SOURCE_DIR="$SCRIPT_DIR/src/config"
+TARGET_DIR="$HOME/.config"
+
+if [ ! -d "$SOURCE_DIR" ]; then
+    echo -e "${R}Error: Folder Source tidak ditemukan di $SOURCE_DIR${NC}"
+    exit 1
+fi
+
+mkdir -p "$TARGET_DIR"
+
+# --- FUNGSI FORMATTING TENGAH (CENTERED UI) ---
+
+BOX_WIDTH=62
+
+get_center_padding() {
+    local term_width=$(tput cols)
+    local padding=$(( (term_width - BOX_WIDTH) / 2 ))
+    if [ $padding -lt 0 ]; then padding=0; fi
+    echo "$padding"
+}
+
+print_border_line() {
+    local type="$1" # top, bottom
+    local pad=$(get_center_padding)
+    local line="────────────────────────────────────────────────────────"
+    
+    printf "%${pad}s" ""
+    if [ "$type" == "top" ]; then
+        echo -e "${D}┌${line}┐${NC}"
+    else
+        echo -e "${D}└${line}┘${NC}"
+    fi
+}
+
+print_content_row() {
+    local left_text="$1"
+    local right_text="$2"
+    local right_color="$3"
+    local pad=$(get_center_padding)
+    
+    printf "%${pad}s" ""
+    printf "${D}│${NC}  ${C}%-32s${NC} ${right_color}%-20s${NC} ${D}│${NC}\n" "$left_text" "$right_text"
+}
+
+print_header() {
+    local title="$1"
+    local term_width=$(tput cols)
+    local title_len=${#title}
+    local pad=$(( (term_width - title_len) / 2 ))
+    if [ $pad -lt 0 ]; then pad=0; fi
+    
+    clear
+    echo ""
+    printf "%${pad}s" ""
+    echo -e "${W}${title}${NC}"
+    print_border_line "top"
+}
+
+# --- LOGIKA UTAMA ---
+
+if [ "$1" == "reset" ]; then
+    # ==========================================
+    # FEATURE: RESET MODE
+    # ==========================================
+    print_header "⚡ DOTFILES RESET ENGINE"
+
+    # Reset folder target
+    shopt -s nullglob
+    for dir in "$SOURCE_DIR"/*; do
+        if [ -d "$dir" ]; then
+            folder_name=$(basename "$dir")
+            
+            # Pengecualian khusus untuk VS Code saat Reset
+            if [ "$folder_name" == "Code" ]; then
+                # Hanya hapus settings.json di dalam subfolder User
+                rm -f "$TARGET_DIR/Code/User/settings.json"
+                print_content_row ".config/Code/User/settings.json" "DELETED" "$R"
+            else
+                rm -rf "$TARGET_DIR/$folder_name"
+                print_content_row ".config/$folder_name" "DELETED" "$R"
+            fi
+        fi
+    done
+
+    # Reset dotfiles home
+    shopt -s dotglob nullglob
+    for item in "$SOURCE_DIR"/*; do
+        if [ -f "$item" ]; then
+            item_name=$(basename "$item")
+            if [[ "$item_name" == .* ]]; then target_name="$item_name"; else target_name=".$item_name"; fi
+            rm -f "$HOME/$target_name"
+            print_content_row "$target_name" "DELETED" "$R"
+        fi
+    done
+
+    print_border_line "bottom"
+    echo ""
+    exit 0
+
+else
+    # ==========================================
+    # FEATURE: SYNC MODE (REPLACE TOTAL)
+    # ==========================================
+    print_header "⚔  DOTFILES DEPLOYMENT ENGINE"
+
+    start_time=$(date +%s.%N)
+
+    # 1. Mengganti Folder di ~/.config
+    shopt -s nullglob
+    for dir in "$SOURCE_DIR"/*; do
+        if [ -d "$dir" ]; then
+            folder_name=$(basename "$dir")
+            target_path="$TARGET_DIR/$folder_name"
+            
+            # CEK APAKAH INI FOLDER VS CODE
+            if [ "$folder_name" == "Code" ]; then
+                # Pastikan direktori tujuan 'Code/User' ada tanpa menghapus isinya
+                mkdir -p "$target_path/User"
+                
+                # Hanya salin file settings.json jika ada di source dotfiles Anda
+                # Sesuaikan path di bawah jika struktur source Anda berbeda (misal langsung src/config/Code/settings.json)
+                if [ -f "$dir/User/settings.json" ]; then
+                    cp -f "$dir/User/settings.json" "$target_path/User/settings.json"
+                elif [ -f "$dir/settings.json" ]; then
+                    cp -f "$dir/settings.json" "$target_path/User/settings.json"
+                fi
+                
+                print_content_row ".config/Code (Settings Only)" "UPDATED" "$G"
+            else
+                # Wipe & Replace murni untuk folder selain VS Code [1]
+                rm -rf "$target_path"
+                mkdir -p "$target_path"
+                cp -rf "$dir"/* "$target_path/"
+                
+                print_content_row ".config/$folder_name" "WIPED & REPLACED" "$G"
+            fi
+        fi
+    done
+
+    # 2. Mengganti File Dotfiles di $HOME
+    shopt -s dotglob nullglob
+    for item in "$SOURCE_DIR"/*; do
+        if [ -f "$item" ]; then
+            item_name=$(basename "$item")
+            
+            if [[ "$item_name" == .* ]]; then
+                target_name="$item_name"
+            else
+                target_name=".$item_name"
+            fi
+            target_path="$HOME/$target_name"
+            
+            # Wipe & Replace murni
+            rm -f "$target_path"
+            cp -f "$item" "$target_path"
+            
+            print_content_row "$target_name" "WIPED & REPLACED" "$G"
+        fi
+    done
+
+    # Tutup panel utama
+    print_border_line "bottom"
+
+    end_time=$(date +%s.%N)
+    duration=$(echo "$end_time - $start_time" | bc 2>/dev/null || echo "0.05")
+
+    # Footer Metadata ringkas di posisi tengah juga
+    echo ""
+    term_width=$(tput cols)
+    footer_text="Finished in ${duration}s • System Updated"
+    footer_pad=$(( (term_width - ${#footer_text}) / 2 ))
+    if [ $footer_pad -lt 0 ]; then footer_pad=0; fi
+    printf "%${footer_pad}s" ""
+    echo -e "${D}${footer_text}${NC}"
+    echo ""
+fi
