@@ -104,3 +104,53 @@ vim.lsp.enable("clangd")
 
 require("fidget").setup({})
 vim.notify = require("fidget").notify
+
+function WEBDEV()
+	require("conform").setup({
+		formatters_by_ft = {
+			nix = { "nixfmt" },
+			lua = { "stylua" },
+			html = { "prettier" },
+			jsx = { "prettier" },
+			json = { "prettier" },
+			jsonc = { "prettier" },
+			javascript = { "prettier" },
+			typescript = { "prettier" },
+			javascriptreact = { "prettier" },
+			typescriptreact = { "prettier" },
+			css = { "prettier" },
+			scss = { "prettier" },
+			less = { "prettier" },
+			vue = { "prettier" },
+			svelte = { "prettier" },
+			markdown = { "prettier" },
+			yaml = { "prettier" },
+		},
+		format_on_save = {
+			timeout_ms = 500,
+			lsp_format = "fallback",
+		},
+	})
+
+	-- LSP Configurations & Snippets
+	vim.pack.add({
+		{ src = "https://github.com/neovim/nvim-lspconfig" },
+		{ src = "https://github.com/rafamadriz/friendly-snippets" },
+		{ src = "https://github.com/L3MON4D3/LuaSnip" },
+	})
+
+	require("luasnip.loaders.from_vscode").load({})
+	local servers = {
+		"emmet_ls",
+		"vtsls",
+		"html",
+		"cssls",
+		"jsonls",
+		"eslint",
+		"vue_ls",
+		"svelte",
+		"tailwindcss",
+	}
+	vim.lsp.enable(servers)
+end
+--WEBDEV()
