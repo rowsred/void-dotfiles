@@ -41,6 +41,10 @@ vim.keymap.set("n", "<leader>hh", function()
 	)
 	vim.notify(msg, vim.log.levels.INFO)
 end, { desc = "Toggle Virtual Text and Inlay Hints" })
+--aucommands
+vim.api.nvim_create_user_command("E", function()
+	vim.cmd("edit $MYVIMRC")
+end, { desc = "edit config" })
 
 vim.pack.add({
 	{ src = "https://github.com/junegunn/fzf.vim" },
