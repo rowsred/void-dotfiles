@@ -41,6 +41,27 @@ vim.keymap.set("n", "<leader>hh", function()
 	)
 	vim.notify(msg, vim.log.levels.INFO)
 end, { desc = "Toggle Virtual Text and Inlay Hints" })
+--status
+function _G.get_lsp_and_formatter()
+	local lsps, fmts = {}, {}
+	local lsp_ok, clients = pcall(vim.lsp.get_clients, { bufnr = 0 })
+	for _, c in ipairs(lsp_ok and clients or {}) do
+		table.insert(lsps, c.name)
+	end
+
+	local cf_ok, cf = pcall(require, "conform")
+	local fmt_ok, formatters = pcall(cf_ok and cf.list_formatters or function() end, 0)
+	for _, f in ipairs(fmt_ok and formatters or {}) do
+		if f.available then
+			table.insert(fmts, f.name)
+		end
+	end
+
+	return (#lsps > 0 and "[" .. table.concat(lsps, ",") .. "]" or "[-]")
+		.. " | "
+		.. (#fmts > 0 and "[" .. table.concat(fmts, ",") .. "]" or "[-]")
+end
+vim.opt.statusline = "%F %m %r %y %= %{v:lua._G.get_lsp_and_formatter()}  %l:%c %P"
 --aucommands
 vim.api.nvim_create_user_command("E", function()
 	vim.cmd("edit $MYVIMRC")
@@ -155,6 +176,8 @@ function WEBDEV()
 		"svelte",
 		"tailwindcss",
 	}
+	--command
+	--sudo npm i -g emmet-ls @vtsls/language-server vscode-langservers-extracted eslint @vue/language-server svelte-language-server @tailwindcss/language-server prettier
 	vim.lsp.enable(servers)
 end
 --WEBDEV()
