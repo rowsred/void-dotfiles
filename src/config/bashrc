@@ -6,5 +6,4 @@
 alias ls='ls --color=auto'
 PS1='[\u@\h \W]\$ '
 
-alias code-oss="code-oss --ozone-platform=wayland"
 eval "$(starship init bash)"
