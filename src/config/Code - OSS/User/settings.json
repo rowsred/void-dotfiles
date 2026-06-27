@@ -8,7 +8,7 @@
   "editor.wordWrapColumn": 80,
   "editor.rulers": [80],
   "editor.lineNumbers": "relative",
-  "workbench.sideBar.location": "right",
+  //"workbench.sideBar.location": "right",
   // =======================removetop===================
   "window.titleBarStyle": "native",
   "window.menuBarVisibility": "hidden",
