@@ -16,6 +16,6 @@
 
 alias ls='ls --color=auto'
 PS1='[\u@\h \W]\$ '
-export PATH="$HOME/.cargo/bin:$PATH"
-
+export PNPM_HOME="$HOME/.local/share/pnpm"
+export PATH="$HOME/.cargo/bin:$PNPM_HOME/bin:$PATH"
 eval "$(starship init bash)"

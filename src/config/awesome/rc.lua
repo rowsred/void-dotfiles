@@ -8,6 +8,7 @@ local awful = require("awful")
 require("awful.autofocus")
 -- Widget and layout library
 local wibox = require("wibox")
+local net_speed = require("net-speed")
 -- Theme handling library
 local beautiful = require("beautiful")
 -- Notification library
@@ -242,6 +243,7 @@ awful.screen.connect_for_each_screen(function(s)
 			mykeyboardlayout,
 			wibox.widget.systray(),
 			mytextclock,
+			net_speed,
 			s.mylayoutbox,
 		},
 	})
