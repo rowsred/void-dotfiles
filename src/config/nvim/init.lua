@@ -77,8 +77,22 @@ vim.pack.add({
 	{ src = "https://github.com/romus204/tree-sitter-manager.nvim" },
 	{ src = "https://github.com/saghen/blink.cmp", version = "v1.10.2" },
 })
-require("oil").setup()
-vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory" })
+require("oil").setup({
+	float = {
+		max_width = 80,
+		max_height = 20,
+		border = "rounded",
+		win_options = {
+			winblend = 0,
+		},
+	},
+	view_options = {
+		show_hidden = false,
+	},
+})
+
+-- Keymap kamu
+vim.keymap.set("n", "-", "<CMD>Oil --float<CR>", { desc = "Open parent directory in float" })
 require("nvim-autopairs").setup({})
 require("tree-sitter-manager").setup({
 	border = "rounded",
