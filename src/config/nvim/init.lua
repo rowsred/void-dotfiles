@@ -1,5 +1,7 @@
+-- =============================================================================
+-- OPTIONS
+-- =============================================================================
 local o = vim.opt
-local map = vim.api.nvim_set_keymap
 
 o.number = true
 o.relativenumber = true
@@ -17,7 +19,13 @@ o.textwidth = 80
 o.colorcolumn = "80"
 o.completeopt = { "menuone", "noselect", "popup" }
 
+-- =============================================================================
+-- KEYMAPS
+-- =============================================================================
+local map = vim.api.nvim_set_keymap
+
 vim.g.mapleader = " "
+
 map("i", "jk", "<esc>", {})
 map("n", "<leader>w", ":w<cr>", {})
 map("n", "<leader>x", ":bdelete<cr>", {})
@@ -25,6 +33,9 @@ map("n", "<leader>c", ":!", {})
 map("n", "<leader>e", ":Ex<cr>", {})
 map("n", "<leader>nh", ":nohl<cr>", {})
 map("n", "<leader>ff", ":FZF<cr>", {})
+
+vim.keymap.set("n", "-", "<CMD>Oil --float<CR>", { desc = "Open parent directory in float" })
+
 vim.keymap.set("n", "<leader>hh", function()
 	local current_diag = vim.diagnostic.config()
 	local diag_status = true
@@ -41,7 +52,10 @@ vim.keymap.set("n", "<leader>hh", function()
 	)
 	vim.notify(msg, vim.log.levels.INFO)
 end, { desc = "Toggle Virtual Text and Inlay Hints" })
---status
+
+-- =============================================================================
+-- STATUSLINE
+-- =============================================================================
 function _G.get_lsp_and_formatter()
 	local lsps, fmts = {}, {}
 	local lsp_ok, clients = pcall(vim.lsp.get_clients, { bufnr = 0 })
@@ -61,12 +75,85 @@ function _G.get_lsp_and_formatter()
 		.. " | "
 		.. (#fmts > 0 and "[" .. table.concat(fmts, ",") .. "]" or "[-]")
 end
+
 vim.opt.statusline = "%F %m %r %y %= %{v:lua._G.get_lsp_and_formatter()}  %l:%c %P"
---aucommands
+
+-- =============================================================================
+-- USER COMMANDS
+-- =============================================================================
 vim.api.nvim_create_user_command("E", function()
 	vim.cmd("edit $MYVIMRC")
 end, { desc = "edit config" })
 
+-- =============================================================================
+-- SIDEBAR SPACER (AUTOCMDS & LOGIC)
+-- =============================================================================
+local function is_spacer_win(win_id)
+	if not vim.api.nvim_win_is_valid(win_id) then
+		return false
+	end
+	local ok, val = pcall(vim.api.nvim_win_get_var, win_id, "is_margin_spacer")
+	return ok and val == true
+end
+
+local function ensure_margin_layout()
+	local spacer_win = nil
+	local normal_win_count = 0
+	local all_wins = vim.api.nvim_list_wins()
+
+	for _, win in ipairs(all_wins) do
+		if is_spacer_win(win) then
+			spacer_win = win
+		else
+			local buf = vim.api.nvim_win_get_buf(win)
+			if vim.bo[buf].buftype == "" then
+				normal_win_count = normal_win_count + 1
+			end
+		end
+	end
+
+	if spacer_win and normal_win_count == 0 then
+		vim.api.nvim_set_current_win(spacer_win)
+		vim.cmd("vnew")
+		vim.cmd("vertical resize 30")
+		vim.cmd("wincmd l")
+		return
+	end
+
+	if not spacer_win then
+		vim.cmd("topleft vnew")
+		vim.cmd("vertical resize 30")
+		vim.api.nvim_win_set_var(0, "is_margin_spacer", true)
+
+		vim.wo.winfixwidth = true
+		vim.wo.number = false
+		vim.wo.relativenumber = false
+		vim.wo.signcolumn = "no"
+		vim.wo.foldcolumn = "0"
+		vim.bo.buftype = "nofile"
+		vim.bo.bufhidden = "wipe"
+
+		vim.cmd("wincmd l")
+	end
+end
+
+vim.api.nvim_create_autocmd({ "VimEnter", "WinEnter", "BufDelete" }, {
+	callback = function()
+		vim.schedule(ensure_margin_layout)
+	end,
+})
+
+vim.api.nvim_create_autocmd("WinEnter", {
+	callback = function()
+		if is_spacer_win(0) then
+			vim.cmd("wincmd l")
+		end
+	end,
+})
+
+-- =============================================================================
+-- PACKAGE MANAGER
+-- =============================================================================
 vim.pack.add({
 	{ src = "https://github.com/junegunn/fzf.vim" },
 	{ src = "https://github.com/stevearc/conform.nvim" },
@@ -77,6 +164,10 @@ vim.pack.add({
 	{ src = "https://github.com/romus204/tree-sitter-manager.nvim" },
 	{ src = "https://github.com/saghen/blink.cmp", version = "v1.10.2" },
 })
+
+-- =============================================================================
+-- PLUGINS CONFIGURATION
+-- =============================================================================
 require("oil").setup({
 	float = {
 		max_width = 80,
@@ -91,9 +182,8 @@ require("oil").setup({
 	},
 })
 
--- Keymap kamu
-vim.keymap.set("n", "-", "<CMD>Oil --float<CR>", { desc = "Open parent directory in float" })
 require("nvim-autopairs").setup({})
+
 require("tree-sitter-manager").setup({
 	border = "rounded",
 	auto_install = true,
@@ -101,7 +191,12 @@ require("tree-sitter-manager").setup({
 	highlight = true,
 	nerdfont = true,
 })
+
 require("blink.cmp").setup({})
+
+require("fidget").setup({})
+vim.notify = require("fidget").notify
+
 require("conform").setup({
 	formatters_by_ft = {
 		lua = { "stylua" },
@@ -114,6 +209,9 @@ require("conform").setup({
 	},
 })
 
+-- =============================================================================
+-- CORE LSP CONFIGURATION
+-- =============================================================================
 vim.lsp.config("lua_ls", {
 	cmd = { "lua-language-server" },
 	filetypes = { "lua" },
@@ -141,9 +239,9 @@ vim.lsp.config("clangd", {
 })
 vim.lsp.enable("clangd")
 
-require("fidget").setup({})
-vim.notify = require("fidget").notify
-
+-- =============================================================================
+-- MODULE: WEB DEVELOPMENT OVERRIDE
+-- =============================================================================
 function WEBDEV()
 	require("conform").setup({
 		formatters_by_ft = {
@@ -171,7 +269,6 @@ function WEBDEV()
 		},
 	})
 
-	-- LSP Configurations & Snippets
 	vim.pack.add({
 		{ src = "https://github.com/neovim/nvim-lspconfig" },
 		{ src = "https://github.com/rafamadriz/friendly-snippets" },
@@ -179,6 +276,7 @@ function WEBDEV()
 	})
 
 	require("luasnip.loaders.from_vscode").load({})
+
 	local servers = {
 		"emmet_ls",
 		"vtsls",
@@ -190,8 +288,7 @@ function WEBDEV()
 		"svelte",
 		"tailwindcss",
 	}
-	--command
-	--sudo npm i -g emmet-ls @vtsls/language-server vscode-langservers-extracted eslint @vue/language-server svelte-language-server @tailwindcss/language-server prettier
 	vim.lsp.enable(servers)
 end
---WEBDEV()
+
+-- WEBDEV()
