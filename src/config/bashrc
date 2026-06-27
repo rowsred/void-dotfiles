@@ -1,3 +1,14 @@
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
 # .bashrc
 
 # If not running interactively, don't do anything
@@ -5,5 +16,6 @@
 
 alias ls='ls --color=auto'
 PS1='[\u@\h \W]\$ '
+export PATH="$HOME/.cargo/bin:$PATH"
 
 eval "$(starship init bash)"
